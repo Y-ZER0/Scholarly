@@ -1,0 +1,25 @@
+import { Module } from "@nestjs/common";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import type { TypeOrmModuleOptions } from "@nestjs/typeorm";
+
+@Module({
+  imports: [
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService): TypeOrmModuleOptions => ({
+        type: "postgres",
+        url: config.get<string>("DATABASE_URL"),
+        ssl: { rejectUnauthorized: false },
+        entities: [__dirname + "/../**/*.entity{.ts,.js}"],
+        synchronize: false,
+        logging: config.get("NODE_ENV") === "development",
+        extra: {
+          max: 5,
+        },
+      }),
+    }),
+  ],
+})
+export class DatabaseModule {}
