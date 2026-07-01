@@ -22,9 +22,9 @@
 
 | # | Task | Type | Status | Notes |
 |---|------|------|--------|-------|
-| 2.1 | Auth Backend Module (JWT + OAuth) | LOGIC | ⏳ | |
-| 2.2 | Login Page | UI | ⏳ | |
-| 2.3 | Register Page | UI | ⏳ | |
+| 2.1 | Auth Backend Module (JWT + OAuth) | LOGIC | ✅ | User entity + UsersRepository/Service/Controller, AuthService with login/register/OAuth, JWT strategy, Google+GitHub strategies, JwtAuthGuard global, @Public/@Roles/@CurrentUser decorators, RolesGuard |
+| 2.2 | Login Page | UI | ✅ | (auth)/layout.tsx + LoginForm.tsx + AuthIcons.tsx — centered card, email/password, show/hide toggle, remember me, forgot password link, Google/GitHub OAuth buttons, react-hook-form + Zod, shield logo SVG |
+| 2.3 | Register Page | UI | ✅ | RegisterForm.tsx + /register/page.tsx — role selector (student/teacher), profile photo upload zone, name/email/password with validation, react-hook-form + Zod |
 | 2.4 | Auth Client State (Context + Hooks) | LOGIC | ⏳ | |
 
 ---
@@ -160,6 +160,7 @@ Track which shared components from `ui-registry.md` have been built:
 | 3 | 2026-06-30 | DeepSeek | 1.3 File Upload Infrastructure | — | — | Supabase Storage over local disk for production readiness |
 | 4 | 2026-06-30 | Mimo | 1.4 Next.js Bootstrap & Global Styles | — | — | shadcn v4 uses base-nova (not New York), HSL tokens via data-theme attr, tweakcn npm is irrelevant (CSS themes in globals.css) |
 | 5 | 2026-06-30 | Mimo | 1.5 Dashboard Shell Layout | — | — | Sidebar collapse via SidebarContext (not URL params), AuthGuard placeholder in (protected)/layout.tsx |
+| 6 | 2026-07-01 | DeepSeek | 2.1 Auth Backend Module | — | — | Separate UsersModule + AuthModule; OAuth redirects direct to frontend FRONTEND_URL/login?token=; uploads endpoint @Public() for Register page |
 
 ---
 
