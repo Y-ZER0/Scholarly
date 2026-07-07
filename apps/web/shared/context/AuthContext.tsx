@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import type { UserDto } from '@repo/shared';
-import { getToken, me as getMe, removeToken, setStoredUser, getStoredUser } from '@/features/auth/logic/auth.service';
+import { getToken, me as getMe, removeToken, setStoredUser, getStoredUser } from '@/features/auth/services/auth.service';
 
 interface AuthContextValue {
   currentUser: UserDto | null;
@@ -22,22 +22,15 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<UserDto | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<UserDto | null>(() => {
+    if (!getToken()) return null;
+    return getStoredUser();
+  });
+
+  const [isLoading, setIsLoading] = useState(() => !!getToken() && !getStoredUser());
 
   useEffect(() => {
-    const token = getToken();
-    if (!token) {
-      setIsLoading(false);
-      return;
-    }
-
-    const stored = getStoredUser();
-    if (stored) {
-      setCurrentUser(stored);
-      setIsLoading(false);
-      return;
-    }
+    if (currentUser || !getToken()) return;
 
     getMe()
       .then((user) => {
@@ -50,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => {
         setIsLoading(false);
       });
-  }, []);
+  }, [currentUser]);
 
   const setUser = useCallback((user: UserDto | null) => {
     setCurrentUser(user);

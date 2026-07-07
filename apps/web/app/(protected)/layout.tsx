@@ -1,5 +1,5 @@
 import { DashboardLayout } from '@/shared/ui/layouts/DashboardLayout';
-import { AuthGuard } from '@/features/auth/logic/AuthGuard';
+import { AuthGuard } from '@/features/auth/ui/guard/AuthGuard';
 
 export default function ProtectedLayout({
   children,

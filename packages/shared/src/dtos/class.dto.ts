@@ -14,6 +14,12 @@ export interface ClassDto {
     id: string;
     code: string;
     name: string;
+    description: string;
+  };
+  department: {
+    id: string;
+    name: string;
+    description: string;
   };
   teacher: {
     id: string;

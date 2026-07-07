@@ -1,7 +1,6 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { createClient } from "@supabase/supabase-js";
-import { nanoid } from "nanoid";
 import * as path from "path";
 
 @Injectable()
@@ -34,6 +33,7 @@ export class UploadsService {
     originalname: string,
   ): Promise<string> {
     const ext = path.extname(originalname);
+    const { nanoid } = await import("nanoid");
     const filePath = `images/${nanoid()}-${Date.now()}${ext}`;
 
     const { error } = await this.supabase.storage

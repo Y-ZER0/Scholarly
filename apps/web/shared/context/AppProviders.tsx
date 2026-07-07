@@ -1,6 +1,7 @@
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'sonner';
 import { ThemeProvider } from './ThemeContext';
 import { SidebarProvider } from './SidebarContext';
 import { AuthProvider } from './AuthContext';
@@ -25,6 +26,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
           </SidebarProvider>
         </AuthProvider>
       </ThemeProvider>
+      <Toaster richColors position="top-right" />
     </QueryClientProvider>
   );
 }

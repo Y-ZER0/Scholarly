@@ -424,6 +424,8 @@ export class DepartmentsService {
 
 ### Repository — Raw TypeORM, No Logic
 
+#### Basic CRUD
+
 ```typescript
 @Injectable()
 export class DepartmentsRepository {
@@ -473,6 +475,106 @@ export class DepartmentsRepository {
   }
 }
 ```
+
+#### Cross-Entity Queries — Native Array Method Approach
+
+When a repository needs data from related tables, **never use `this.repo.query()` with raw SQL strings.** Instead:
+
+1. Create TypeORM entity stubs for related tables (with `@ManyToOne` / `@OneToMany` decorators)
+2. Use `this.repo.manager.find(RelatedEntity, { where, relations, order, select })` to load data
+3. Use native JavaScript array methods (`.filter()`, `.map()`, `.find()`, `.reduce()`, `.sort()`) for in-memory joins and transformations
+
+```typescript
+import { UserRole } from "@repo/shared";
+import { Subject } from "../../subjects/entities/subject.entity";
+import { Class } from "../../classes/entities/class.entity";
+import { Enrollment } from "../../enrollments/entities/enrollment.entity";
+import { User } from "../../users/entities/user.entity";
+
+@Injectable()
+export class DepartmentsRepository {
+  constructor(
+    @InjectRepository(Department)
+    private readonly repo: Repository<Department>,
+  ) {}
+
+  // Simple filtered query — TypeORM select + native sort
+  async findSubjectsByDepartment(departmentId: string) {
+    return this.repo.manager.find(Subject, {
+      where: { departmentId },
+      select: { id: true, code: true, name: true, description: true },
+      order: { createdAt: "DESC" },
+    });
+  }
+
+  // Load with relations, then filter + map in memory
+  async findClassesByDepartment(departmentId: string) {
+    const classes = await this.repo.manager.find(Class, {
+      relations: { subject: true, teacher: true },
+      order: { createdAt: "DESC" },
+    });
+    return classes
+      .filter((c) => c.subject.departmentId === departmentId)
+      .map((c) => ({
+        id: c.id,
+        name: c.name,
+        status: c.status,
+        subject: { id: c.subject.id, code: c.subject.code, name: c.subject.name },
+        teacher: {
+          id: c.teacher.id,
+          name: c.teacher.name,
+          email: c.teacher.email,
+          profilePhoto: c.teacher.profilePhoto,
+        },
+      }));
+  }
+
+  // Multi-step chain: load A → extract IDs → load B → native Set for uniqueness
+  async findStudentsByDepartment(departmentId: string) {
+    const subjects = await this.repo.manager.find(Subject, {
+      where: { departmentId },
+      select: { id: true },
+    });
+    const subjectIds = subjects.map((s) => s.id);
+    if (subjectIds.length === 0) return [];
+
+    const classes = await this.repo.manager.find(Class, {
+      where: subjectIds.map((id) => ({ subjectId: id })),
+      select: { id: true },
+    });
+    const classIds = classes.map((c) => c.id);
+    if (classIds.length === 0) return [];
+
+    const enrollments = await this.repo.manager.find(Enrollment, {
+      where: classIds.map((id) => ({ classId: id })),
+      select: { studentId: true },
+    });
+    const studentIds = [...new Set(enrollments.map((e) => e.studentId))];
+    if (studentIds.length === 0) return [];
+
+    return this.repo.manager.find(User, {
+      where: studentIds.map((id) => ({ id, role: UserRole.STUDENT })),
+      select: { id: true, name: true, email: true, profilePhoto: true, role: true },
+      order: { name: "ASC" },
+    });
+  }
+
+  // Aggregate with native Set.size instead of COUNT(DISTINCT ...)
+  async countStudentsByDepartment(departmentId: string): Promise<number> {
+    // ... same chain as findStudentsByDepartment ...
+    return new Set(enrollments.map((e) => e.studentId)).size;
+  }
+}
+```
+
+**Rules:**
+- Every cross-entity query must use TypeORM's entity manager or query builder. **Zero tolerance for raw SQL strings.**
+- Every table referenced in a join must have a TypeORM entity file with relationship decorators.
+- Use `this.repo.manager.find()` to query entities not owned by this repository (avoids injecting extra repos).
+- Use native `Set` for deduplication (replaces `SELECT DISTINCT`).
+- Use `.filter()` + `.map()` for in-memory joins (replaces `JOIN ... ON ...`).
+- Use `.sort()` or `order` option for ordering (replaces `ORDER BY`).
+- Chain multiple `find()` calls with early returns when intermediate arrays are empty.
 
 ### Error Handling — Throw at Service Level
 

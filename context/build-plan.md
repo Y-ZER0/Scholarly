@@ -335,51 +335,115 @@
 
 ---
 
-## Phase 7: Enrollments Feature
+## Phase 7: Enrollment Feature
 
-### 7.1 `[LOGIC]` Enrollments Backend
+> **Design principle**: The feature is separated into Teacher and Student perspectives.
+> - **Teacher** manages enrollments for their own classes (full CRUD). The existing `/classes` list page (Phase 6.3) shows **all** classes (active + inactive) — this is the teacher/admin class management view.
+> - **Student** views their current enrollments and browses **only** active classes with open spots (`enrollmentCount < capacity`) to join via invite code.
+> - The `/enrollments` route is **role-gated**: renders TeacherEnrollments or StudentEnrollments based on `user.role`.
 
-- `Enrollment` entity: id, classId (FK), studentId (FK), enrolledAt; UNIQUE(classId, studentId) constraint
-- `EnrollmentsRepository`: findAllByStudent(studentId, paginated), findAllByClass(classId, paginated), findByClassAndStudent, create, remove
-- `EnrollmentsService`:
-  - `joinByCode(inviteCode, studentId)`: find class by inviteCode → validate active → check capacity → check no duplicate → create enrollment → return EnrollmentDto
-  - `findByStudent(studentId, pagination)`: paginated list with class + subject + teacher populated
-  - `findByClass(classId, pagination)`: for teachers to see roster
-  - `remove(id, requestingUserId)`: can only remove own enrollment or admin
-- `EnrollmentsController`:
-  - `GET /enrollments` — returns calling user's enrollments (student) or their class rosters (teacher)
-  - `POST /enrollments/join` — `{ inviteCode }` body
-  - `DELETE /enrollments/:id`
-- `EnrollmentsModule`
+### 7.1 `[LOGIC]` Enrollments Backend — Teacher Endpoints
 
-### 7.2 `[LOGIC]` Enrollments Client Logic
+- **Repository**:
+  - `findByClassId(classId, { page, limit })` — paginated enrollments for a specific class
+  - `findAllByTeacherId(teacherId, { page, limit, classId?, search? })` — enrollments across teacher's classes, optionally filtered by classId and student name/email search
+  - `create(data)` — insert enrollment
+  - `remove(id)` — delete enrollment
+  - `findByStudentEmail(email)` — lookup student by email for manual add
+- **Service**:
+  - `findTeacherEnrollments(teacherId, filters)`: returns paginated enrollment list across teacher's classes, with class/subject/student relations
+  - `addStudent(dto, teacherId)`: validates class belongs to teacher → student exists → no duplicate → capacity check → create
+  - `removeEnrollment(enrollmentId, teacherId)`: validates enrollment's class belongs to teacher → remove
+  - `getTeacherClasses(teacherId)`: returns teacher's own classes for filter dropdown
+- **Controller**:
+  - `GET /api/enrollments/teacher` — paginated, `?classId=`, `?search=`, `?page=`, `?limit=`
+  - `GET /api/enrollments/teacher/classes` — teacher's classes for dropdown
+  - `POST /api/enrollments/teacher/add` — body `{ classId, studentEmail }`
+  - `DELETE /api/enrollments/teacher/:id`
+- **DTOs**: `AddStudentRequestDto` (`classId` uuid, `studentEmail` string), `TeacherEnrollmentDto`
+- `EnrollmentsModule` — registers controller/service/repository, imports `ClassesModule`, `TypeOrmModule.forFeature([Enrollment])`
 
-- `EnrollmentDto` in `@repo/shared`: id, class (id+name+bannerImage), subject (name+code), teacher (name), status, enrolledAt
-- `enrollment.service.ts`: `getMyEnrollments({ page, limit })`, `joinClass({ inviteCode })`, `unenroll(id)`
-- `enrollmentKeys.ts`
-- `useEnrollments.ts`: paginated list
-- `useJoinClass.ts`: `useMutation` → on success `invalidateQueries(enrollmentKeys.lists())`
-- `useUnenroll.ts`: `useMutation` → on success `invalidateQueries`
+### 7.2 `[LOGIC]` Enrollments Backend — Student Endpoints
 
-### 7.3 `[UI]` Enrollments Page
+- **Repository additions**:
+  - `findByStudentId(studentId, { page, limit })` with `class.subject.teacher` and `class.subject.department` relations
+- **Service**:
+  - `joinByCode(inviteCode, studentId)`: find class by inviteCode → validate `status=ACTIVE` → check `enrollmentCount < capacity` → check no duplicate → create enrollment → return EnrollmentDto
+  - `findMyEnrollments(studentId, { page, limit })`: paginated with class/subject/teacher
+  - `unenroll(enrollmentId, studentId)`: validate ownership → remove
+- **Controller**:
+  - `GET /api/enrollments` — student's own enrollments (paginated)
+  - `POST /api/enrollments/join` — body `{ inviteCode }`
+  - `DELETE /api/enrollments/:id` — self-unenroll
+- **ClassesController addition**:
+  - `GET /api/classes/available` — returns classes WHERE `status=ACTIVE` AND `enrollmentCount < capacity`, with `?search=`, `?page=`, `?limit=`
+- **DTOs**: `JoinClassRequestDto` with `@IsString()` `inviteCode`
 
-- Route: `/enrollments`
-- `PageHeader`: title "Enrollments", description; "Join a Class" green button (top right) — opens `JoinClassModal`
-- `DataTable` columns: Class (banner thumbnail + name), Subject, Teacher, Status (StatusBadge), Enrolled At (formatted date), Details ("View" → `/classes/[id]`)
-- Pagination
-- Empty state with "Join a class to see it here." message
+### 7.3 `[LOGIC]` Enrollments Client Logic — Teacher
 
-### 7.4 `[UI]` Join Class Modal
+- `enrollment.service.ts` additions: `getTeacherEnrollments({ page, limit, classId, search })`, `getTeacherClasses()`, `addStudent(dto)`, `removeEnrollment(id)`
+- `enrollmentKeys.ts` additions: `teacherLists()`, `teacherList(filters)`, `teacherClasses()`
+- `useTeacherEnrollments.ts`: `useQuery` with `enabled: !!user && user.role === 'teacher'`, `staleTime: 30_000`
+- `useTeacherClasses.ts`: `useQuery` for dropdown options
+- `useAddStudent.ts`: `useMutation` → `invalidateQueries(teacherLists())` + success toast
+- `useRemoveEnrollment.ts`: `useMutation` → `invalidateQueries(teacherLists())` + success toast
 
-- `Dialog` component from shadcn
-- Triggered by "Join Class" button on Class Detail page AND "Join a Class" on Enrollments page
-- Content:
-  - Heading: "Join a Class"
-  - Steps list (same 3 steps from Class Detail page)
-  - Invite code `Input` (placeholder: "Enter invite code")
-  - Full-width green "Join" button
-  - Error message below input on invalid code (red text)
-- On success: closes modal, shows toast "Successfully joined!", invalidates enrollment queries
+### 7.4 `[LOGIC]` Enrollments Client Logic — Student
+
+- `enrollment.service.ts` additions: `getMyEnrollments({ page, limit })`, `joinClass({ inviteCode })`, `unenroll(id)`
+- `enrollmentKeys.ts` additions: `studentLists()`, `studentList(filters)`
+- `useMyEnrollments.ts`: `useQuery` with `enabled: !!user && user.role === 'student'`, `staleTime: 30_000`
+- `useJoinClass.ts`: `useMutation` → `invalidateQueries(studentLists())` + success toast
+- `useUnenroll.ts`: `useMutation` → `invalidateQueries(studentLists())` + success toast
+- `class.service.ts` addition: `getAvailableClasses({ page, limit, search })`
+- `classKeys.ts` addition: `availableLists()`, `availableList(filters)`
+- `useAvailableClasses.ts`: `useQuery` with `staleTime: 30_000`
+
+### 7.5 `[UI]` Teacher Enrollment Management Page
+
+- Route: `/enrollments` — **role-gated**: `user.role === TEACHER` renders `TeacherEnrollments`, `user.role === STUDENT` renders `StudentEnrollments`
+- `PageHeader`: title "Enrollment Management", subtitle "Manage students enrolled in your classes."
+- Filter bar: Class dropdown (populated via `useTeacherClasses`), search input (by student name/email)
+- `DataTable` columns: Student (UserAvatar 32px + name + email), Class (name), Enrolled At (formatted date), Actions (Remove button — opens confirmation dialog)
+- "+ Add Student" button (green) → opens `AddStudentDialog`:
+  - Class \* (Select dropdown — populated via `useTeacherClasses`)
+  - Student Email \* (email input)
+  - "Add" green button → submit → on success toast + close dialog
+  - Error states: student not found, duplicate, class full
+- Pagination: rows-per-page + page info + prev/next arrows
+- Empty state: "No students enrolled in your classes." / "No results match your search."
+- Loading state: skeleton rows
+- `EnrollmentDto` extended for teacher view: includes `student` (id, name, email, profilePhoto), `classId`, `className`
+
+### 7.6 `[UI]` Student Enrollments & Available Classes Pages
+
+- **`/enrollments`** (student view, role-gated):
+  - `PageHeader`: title "My Enrollments", subtitle "Classes you're currently enrolled in."
+  - "Browse Classes" green outline button (right-aligned) → navigates to `/classes/available`
+  - `DataTable` columns: Class (name + bannerImage 32px thumbnail), Subject (code + name), Teacher (name), Enrolled At (formatted date), Actions ("View" → `/classes/[id]`, "Unenroll" with confirmation)
+  - Pagination
+  - Empty state: "You haven't joined any classes yet." + "Browse Available Classes" CTA button
+  - Loading state: skeleton rows
+
+- **`/classes/available`** (new route — student browsing):
+  - `PageHeader`: title "Available Classes", subtitle "Browse classes with open spots remaining."
+  - Search input (by class name)
+  - `DataTable` columns: Class (name), Subject (code + name), Teacher (name), Spots (`enrolledCount / capacity`), Status (StatusBadge "Active"), Actions ("View Details" → `/classes/[id]`)
+  - Pagination
+  - Empty state: "No classes with open spots at this time. Check back later."
+  - Loading state: skeleton rows
+
+### 7.7 `[UI]` Class Detail — Role-based Join & Enrolled Students
+
+- Update `ClassDetail.tsx`:
+  - **Teacher viewing**: Hide "Join Class" section entirely. "Enrolled Students" DataTable shows real data from `GET /api/classes/:id/enrollments`. Teacher sees Remove button per student row.
+  - **Student viewing (not enrolled)**: Show "Join Class" section with:
+    - Numbered steps hint ("1. Ask your teacher for the invite code. 2. Enter it below and click Join.")
+    - Invite code input + full-width green "Join" button
+    - Error/success feedback inline
+    - "Enrolled Students" DataTable shown below (read-only, no actions)
+  - **Student viewing (already enrolled)**: Show "✓ You are enrolled" status message with `enrolledAt` date. No Join section. Enrolled Students DataTable shown below.
+- Backend: add `GET /api/classes/:id/enrollments` — returns paginated enrolled students with UserAvatar data (name, email, profilePhoto, enrolledAt). Teacher can access any class's enrollments; student sees only confirm they're enrolled (basic read-only list).
 
 ---
 
