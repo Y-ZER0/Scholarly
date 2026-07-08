@@ -6,6 +6,7 @@ import { Breadcrumb } from '@/shared/ui/components/Breadcrumb';
 import { DetailPageHeader } from '@/shared/ui/components/DetailPageHeader';
 import { StatCard } from '@/shared/ui/components/StatCard';
 import { DataTable } from '@/shared/ui/components/DataTable';
+import { ErrorBoundary } from '@/shared/ui/components/ErrorBoundary';
 import { useDepartment } from '../../hooks/useDepartment';
 import { getSubjectColumns, getClassColumns, getUserColumns } from './columns';
 
@@ -36,6 +37,7 @@ export function DepartmentDetail({ id }: DepartmentDetailProps) {
   }
 
   return (
+    <ErrorBoundary fallbackTitle="Department Error" fallbackMessage="Failed to render department details.">
     <div>
       <Breadcrumb
         items={[
@@ -119,5 +121,6 @@ export function DepartmentDetail({ id }: DepartmentDetailProps) {
         />
       </div>
     </div>
+    </ErrorBoundary>
   );
 }

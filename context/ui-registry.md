@@ -506,8 +506,8 @@ interface ViewLinkProps {
 ---
 
 ### `LoadingSpinner`
-**Path:** `src/shared/ui/components/LoadingSpinner.tsx`  
-**Created:** ⏳  
+**Path:** `shared/ui/components/LoadingSpinner.tsx`  
+**Created:** 2026-07-07  
 **Purpose:** Full-section loading indicator. Used as page-level fallback before DataTable renders.
 
 ```typescript
@@ -734,7 +734,8 @@ Email:         "text-xs text-muted-foreground"
 | `LoginForm` | `features/auth/ui/LoginForm.tsx` | ✅ |
 | `RegisterForm` | `features/auth/ui/RegisterForm.tsx` | ✅ |
 | `AuthGuard` | `features/auth/ui/AuthGuard.tsx` | ⏳ |
-| `ThemeToggle` | `shared/ui/components/ThemeToggle.tsx` | ⏳ |
+| `ThemeToggle` | `shared/ui/components/ThemeToggle.tsx` | ✅ |
+| `ErrorBoundary` | `shared/ui/components/ErrorBoundary.tsx` | ✅ |
 | `DashboardOverview` | `features/dashboard/ui/DashboardOverview.tsx` | ✅ |
 | `DashboardInsights` | `features/dashboard/ui/DashboardInsights.tsx` | ✅ |
 | `UsersByRoleChart` | `features/dashboard/ui/UsersByRoleChart.tsx` | ✅ |

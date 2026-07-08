@@ -108,9 +108,9 @@
 
 | # | Task | Type | Status | Notes |
 |---|------|------|--------|-------|
-| 9.1 | Search & Filter Backend Audit | LOGIC | ⏳ | |
-| 9.2 | tweakcn Theme System Integration | UI | ⏳ | |
-| 9.3 | Empty States, Loading, Error States | UI | ⏳ | |
+| 9.1 | Search & Filter Backend Audit | LOGIC | ⏳ | Skipped per user request |
+| 9.2 | tweakcn Theme System Integration | UI | ✅ | ThemeToggle component created (cycles 4 themes: dark/light/dark-blue/dark-purple), extracted from DashboardLayout inline code. tweakcn CLI not applicable (shadcn-vue, not React). CSS variables already correct in globals.css. |
+| 9.3 | Empty States, Loading, Error States | UI | ✅ | Enhanced EmptyState (Inbox icon + optional action CTA), created LoadingSpinner (shared, 3 sizes), created ErrorBoundary (React class component with fallback UI), DataTable error state now has Refresh button, dashboard inline spinners replaced with LoadingSpinner, all 4 detail pages wrapped in ErrorBoundary. |
 
 ---
 
@@ -129,7 +129,7 @@ Track which shared components from `ui-registry.md` have been built:
 | StatCard | `shared/ui/components/StatCard.tsx` | ✅ |
 | RankList | `shared/ui/components/RankList.tsx` | ✅ |
 | EmptyState | `shared/ui/components/EmptyState.tsx` | ✅ |
-| LoadingSpinner | `shared/ui/components/LoadingSpinner.tsx` | ⏳ |
+| LoadingSpinner | `shared/ui/components/LoadingSpinner.tsx` | ✅ |
 | CodeBadge | `shared/ui/components/CodeBadge.tsx` | ✅ |
 | StatusBadge | `shared/ui/components/StatusBadge.tsx` | ✅ |
 | DepartmentChip | `shared/ui/components/DepartmentChip.tsx` | ⏳ |
@@ -151,6 +151,7 @@ Track which shared components from `ui-registry.md` have been built:
 | `/enrollments` route is role-gated — TeacherEnrollments vs StudentEnrollments | Single sidebar link, but Teacher and Student have completely different views and actions on enrollments. Role-gating avoids route duplication. | 7.5 / 7.6 | 2026-07-06 |
 | Available classes (`/classes/available`) is a separate endpoint from the full classes list | Students should only see active classes with open spots — the full list includes inactive classes and is the teacher/admin management view | 7.6 | 2026-07-06 |
 | `GET /api/classes/:id/enrollments` for enrolled students on class detail | Keeps class detail endpoint lightweight; paginated enrollment list is fetched separately when the user views the detail page | 7.7 | 2026-07-06 |
+| tweakcn CLI is shadcn-vue, not React | `npx tweakcn@latest add` runs the shadcn-vue CLI which doesn't support React projects. ThemeToggle built manually using existing CSS variables and useTheme context. | 9.2 | 2026-07-07 |
 | Dashboard endpoints are NOT paginated | Dashboard is a summary view — all data is top-N and aggregate counts, never full lists | 8.1 | — |
 | Create Class as a full page (`/classes/create`), not a modal | Banner image upload needs full-width space and the form is large enough to warrant its own route | 6.4 | — |
 | tweakcn themes stored as `data-theme` attribute on `<html>` | Matches tweakcn's generated CSS selector pattern `[data-theme="dark"]` | 9.2 | — |
@@ -184,6 +185,7 @@ Track which shared components from `ui-registry.md` have been built:
 | 18 | 2026-07-06 | Mimo | 7.6 Student Enrollments & Available Classes Pages | — | — | StudentEnrollments uses useMyEnrollments + useUnenroll with confirmation dialog; "Browse Classes" outline button in filters slot; AvailableClasses uses useAvailableClasses with search; both follow established DataTable patterns; new /classes/available route |
 | 19 | 2026-07-07 | Mimo | 7.7 Class Detail Role-based Join & Enrolled Students | — | — | Backend: GET /enrollments/class/:classId (no role guard — both teacher/student need enrolled list). ClassDetail: role-gated Join section (teacher=hide, student not enrolled=invite code input, student enrolled=status badge). useMyEnrollments with high limit for enrollment check. useClassEnrollments for enrolled students DataTable. |
 | 20 | 2026-07-07 | DeepSeek | 8.1 Dashboard Backend | — | — | Dashboard endpoints are @Public() (no auth — MVP). No repository layer — service directly injects entity repos. stats uses 7 parallel count() queries. charts uses createQueryBuilder with relation joins + GROUP BY. recent uses find() for newest + cross-entity aggregation queries for top-N lists. Enrollment count for newestClasses uses batch query matching existing pattern. |
+| 21 | 2026-07-07 | Mimo | 9.2 Theme System Integration, 9.3 Empty/Loading/Error States | — | — | tweakcn CLI is shadcn-vue (not React) — skipped. ThemeToggle created (cycles 4 themes via useTheme context). EmptyState enhanced (Inbox icon + action CTA). LoadingSpinner created (shared, 3 sizes). ErrorBoundary created (React class component). DataTable error state now has Refresh button. Dashboard inline spinners replaced. All 4 detail pages wrapped in ErrorBoundary. Suspense boundaries added to login + reset-password pages for Next.js 16 compatibility. Build + type-check clean. |
 
 ---
 

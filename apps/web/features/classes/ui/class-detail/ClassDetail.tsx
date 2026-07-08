@@ -10,6 +10,7 @@ import { DataTable } from '@/shared/ui/components/DataTable';
 import { CodeBadge } from '@/shared/ui/components/CodeBadge';
 import { StatusBadge } from '@/shared/ui/components/StatusBadge';
 import { UserAvatar } from '@/shared/ui/components/UserAvatar';
+import { ErrorBoundary } from '@/shared/ui/components/ErrorBoundary';
 import { Input } from '@/components/ui/input';
 import { useClass } from '../../hooks/useClass';
 import { useAuth } from '@/shared/context/AuthContext';
@@ -79,6 +80,7 @@ export function ClassDetail({ id }: ClassDetailProps) {
   }
 
   return (
+    <ErrorBoundary fallbackTitle="Class Error" fallbackMessage="Failed to render class details.">
     <div>
       <Breadcrumb
         items={[
@@ -254,5 +256,6 @@ export function ClassDetail({ id }: ClassDetailProps) {
         emptyMessage="No students enrolled yet"
       />
     </div>
+    </ErrorBoundary>
   );
 }

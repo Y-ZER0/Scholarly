@@ -5,6 +5,7 @@ import { Breadcrumb } from '@/shared/ui/components/Breadcrumb';
 import { DetailPageHeader } from '@/shared/ui/components/DetailPageHeader';
 import { DataTable } from '@/shared/ui/components/DataTable';
 import { CodeBadge } from '@/shared/ui/components/CodeBadge';
+import { ErrorBoundary } from '@/shared/ui/components/ErrorBoundary';
 import { useSubject } from '../../hooks/useSubject';
 import { getClassColumns, getUserColumns } from './columns';
 
@@ -35,6 +36,7 @@ export function SubjectDetail({ id }: SubjectDetailProps) {
   }
 
   return (
+    <ErrorBoundary fallbackTitle="Subject Error" fallbackMessage="Failed to render subject details.">
     <div>
       <Breadcrumb
         items={[
@@ -100,5 +102,6 @@ export function SubjectDetail({ id }: SubjectDetailProps) {
         />
       </div>
     </div>
+    </ErrorBoundary>
   );
 }

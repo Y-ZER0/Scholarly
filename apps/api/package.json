@@ -6,6 +6,7 @@
     "build": "tsc",
     "start": "node dist/main.js",
     "dev": "ts-node -r tsconfig-paths/register src/main.ts",
+    "seed": "ts-node -r tsconfig-paths/register src/seed.ts",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
@@ -20,6 +21,7 @@
     "@supabase/supabase-js": "^2.110.0",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
+    "dotenv": "^16.6.1",
     "class-validator": "^0.15.1",
     "multer": "^2.2.0",
     "nanoid": "^5.1.16",

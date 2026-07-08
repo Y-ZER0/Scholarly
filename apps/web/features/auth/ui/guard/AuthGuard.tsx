@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/shared/context/AuthContext';
+import { LoadingSpinner } from '@/shared/ui/components/LoadingSpinner';
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -17,7 +18,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        <LoadingSpinner size="lg" />
       </div>
     );
   }

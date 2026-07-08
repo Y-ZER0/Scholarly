@@ -1,6 +1,7 @@
 'use client';
 
 import { RankList } from '@/shared/ui/components/RankList';
+import { LoadingSpinner } from '@/shared/ui/components/LoadingSpinner';
 import { SubjectsPerDeptChart } from './SubjectsPerDeptChart';
 import { ClassesPerSubjectChart } from './ClassesPerSubjectChart';
 import { useDashboardCharts } from '../hooks/useDashboardCharts';
@@ -49,10 +50,10 @@ export function DashboardInsights() {
         {chartLoading ? (
           <>
             <div className="bg-card border border-border rounded-lg p-5 h-[280px] flex items-center justify-center">
-              <div className="h-6 w-6 border-2 border-muted border-t-primary rounded-full animate-spin" />
+              <LoadingSpinner />
             </div>
             <div className="bg-card border border-border rounded-lg p-5 h-[280px] flex items-center justify-center">
-              <div className="h-6 w-6 border-2 border-muted border-t-primary rounded-full animate-spin" />
+              <LoadingSpinner />
             </div>
           </>
         ) : (
@@ -68,10 +69,10 @@ export function DashboardInsights() {
         {recentLoading ? (
           <>
             <div className="bg-card border border-border rounded-lg p-5 h-[280px] flex items-center justify-center">
-              <div className="h-6 w-6 border-2 border-muted border-t-primary rounded-full animate-spin" />
+              <LoadingSpinner />
             </div>
             <div className="bg-card border border-border rounded-lg p-5 h-[280px] flex items-center justify-center">
-              <div className="h-6 w-6 border-2 border-muted border-t-primary rounded-full animate-spin" />
+              <LoadingSpinner />
             </div>
           </>
         ) : (
@@ -87,10 +88,10 @@ export function DashboardInsights() {
         {recentLoading ? (
           <>
             <div className="bg-card border border-border rounded-lg p-5 h-[200px] flex items-center justify-center">
-              <div className="h-6 w-6 border-2 border-muted border-t-primary rounded-full animate-spin" />
+              <LoadingSpinner />
             </div>
             <div className="bg-card border border-border rounded-lg p-5 h-[200px] flex items-center justify-center">
-              <div className="h-6 w-6 border-2 border-muted border-t-primary rounded-full animate-spin" />
+              <LoadingSpinner />
             </div>
           </>
         ) : (

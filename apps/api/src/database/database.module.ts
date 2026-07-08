@@ -11,9 +11,9 @@ import type { TypeOrmModuleOptions } from "@nestjs/typeorm";
       useFactory: (config: ConfigService): TypeOrmModuleOptions => ({
         type: "postgres",
         url: config.get<string>("DATABASE_URL"),
-        ssl: config.get("NODE_ENV") === "production" ? { rejectUnauthorized: false } : false,
+        ssl: { rejectUnauthorized: false },
         entities: [__dirname + "/../**/*.entity{.ts,.js}"],
-        synchronize: true,
+        synchronize: false,
         logging: config.get("NODE_ENV") === "development",
         extra: {
           max: 5,

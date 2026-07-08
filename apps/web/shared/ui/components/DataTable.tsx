@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, RefreshCw } from 'lucide-react';
 import { EmptyState } from './EmptyState';
 import { SectionHeader } from './SectionHeader';
 
@@ -43,6 +43,7 @@ interface DataTableProps<T> {
   rowKey?: (row: T, index: number) => string | number;
   title?: string;
   count?: number;
+  onRetry?: () => void;
 }
 
 export function DataTable<T>({
@@ -60,6 +61,7 @@ export function DataTable<T>({
   rowKey,
   title,
   count,
+  onRetry,
 }: DataTableProps<T>) {
   if (isError) {
     return (
@@ -67,6 +69,12 @@ export function DataTable<T>({
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <p className="text-base font-semibold text-foreground">Failed to load data</p>
           <p className="mt-1 text-sm text-muted-foreground">Try refreshing the page.</p>
+          {onRetry && (
+            <Button variant="outline" size="sm" className="mt-4 gap-2" onClick={onRetry}>
+              <RefreshCw className="h-3.5 w-3.5" />
+              Refresh
+            </Button>
+          )}
         </div>
       </div>
     );

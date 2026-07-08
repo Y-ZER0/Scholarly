@@ -6,6 +6,7 @@ import { DetailPageHeader } from '@/shared/ui/components/DetailPageHeader';
 import { DataTable } from '@/shared/ui/components/DataTable';
 import { StatusBadge } from '@/shared/ui/components/StatusBadge';
 import { UserAvatar } from '@/shared/ui/components/UserAvatar';
+import { ErrorBoundary } from '@/shared/ui/components/ErrorBoundary';
 import { useFacultyMember } from '../../hooks/useFacultyMember';
 import { getDepartmentColumns, getSubjectColumns, getClassColumns } from './columns';
 
@@ -36,6 +37,7 @@ export function FacultyDetail({ id }: FacultyDetailProps) {
   }
 
   return (
+    <ErrorBoundary fallbackTitle="Faculty Error" fallbackMessage="Failed to render faculty details.">
     <div>
       <Breadcrumb
         items={[
@@ -114,5 +116,6 @@ export function FacultyDetail({ id }: FacultyDetailProps) {
         />
       </div>
     </div>
+    </ErrorBoundary>
   );
 }

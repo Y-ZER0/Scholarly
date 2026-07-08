@@ -2,6 +2,7 @@
 
 import { Users, GraduationCap, Shield, BookOpen, Building2, Layers } from 'lucide-react';
 import { StatCard } from '@/shared/ui/components/StatCard';
+import { LoadingSpinner } from '@/shared/ui/components/LoadingSpinner';
 import { UsersByRoleChart } from './UsersByRoleChart';
 import { useDashboardStats } from '../hooks/useDashboardStats';
 import { useDashboardCharts } from '../hooks/useDashboardCharts';
@@ -45,7 +46,7 @@ export function DashboardOverview() {
         <div className="lg:col-span-2">
           {chartsLoading ? (
             <div className="bg-card border border-border rounded-lg p-5 h-[380px] flex items-center justify-center">
-              <div className="h-6 w-6 border-2 border-muted border-t-primary rounded-full animate-spin" />
+              <LoadingSpinner />
             </div>
           ) : (
             <UsersByRoleChart data={charts?.usersByRole ?? []} />
