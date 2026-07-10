@@ -67,14 +67,16 @@ export function TeacherEnrollments() {
 
   const classFilter = (
     <Select
-      value={classId}
+      value={classId || 'all'}
       onValueChange={(value) => {
         setClassId(!value || value === 'all' ? '' : value);
         setPage(1);
       }}
     >
       <SelectTrigger className="h-9 w-[180px]">
-        <SelectValue placeholder="All Classes" />
+        <SelectValue>
+          {classes?.find((c) => c.id === classId)?.name ?? 'All Classes'}
+        </SelectValue>
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="all">All Classes</SelectItem>

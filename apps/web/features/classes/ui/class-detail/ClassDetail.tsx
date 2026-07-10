@@ -18,6 +18,7 @@ import { useJoinClass } from '@/features/enrollments/hooks/student/useJoinClass'
 import { useMyEnrollments } from '@/features/enrollments/hooks/student/useMyEnrollments';
 import { useClassEnrollments } from '@/features/enrollments/hooks/useClassEnrollments';
 import { getEnrolledStudentColumns } from './columns';
+import { Copy, Check } from 'lucide-react';
 import { UserRole } from '@repo/shared';
 import { formatDate } from '@/shared/lib/utils';
 
@@ -60,6 +61,20 @@ export function ClassDetail({ id }: ClassDetailProps) {
   }, [inviteCode, joinClass, refetch]);
 
   const isStudent = currentUser?.role === UserRole.STUDENT;
+  const isTeacherOrAdmin = currentUser?.role === UserRole.ADMIN || currentUser?.id === classData?.teacherId;
+
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyInviteCode = useCallback(() => {
+    if (!classData?.inviteCode) return;
+    navigator.clipboard.writeText(classData.inviteCode).then(() => {
+      setCopied(true);
+      toast.success('Invite code copied!');
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {
+      toast.error('Failed to copy');
+    });
+  }, [classData?.inviteCode]);
 
   if (isError) {
     return (
@@ -192,6 +207,36 @@ export function ClassDetail({ id }: ClassDetailProps) {
             </div>
           )}
         </div>
+
+        {/* Invite Code — Teacher & Admin only */}
+        {isTeacherOrAdmin && classData?.inviteCode && (
+          <>
+            <div className="border-t border-border my-4" />
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-xs">🔑</span>
+                <span className="text-xs font-semibold tracking-wider uppercase text-muted-foreground">
+                  INVITE CODE
+                </span>
+              </div>
+              <div className="flex items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
+                <span className="font-mono text-lg font-bold text-primary tracking-widest">
+                  {classData.inviteCode}
+                </span>
+                <button
+                  onClick={handleCopyInviteCode}
+                  className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors"
+                  aria-label="Copy invite code"
+                >
+                  {copied ? <Check className="h-4 w-4 text-primary" /> : <Copy className="h-4 w-4" />}
+                </button>
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Share this code with students so they can join this class.
+              </p>
+            </div>
+          </>
+        )}
 
         <div className="border-t border-border my-4" />
 

@@ -23,6 +23,7 @@ export class ClassesRepository {
     const qb = this.repo
       .createQueryBuilder("class")
       .leftJoinAndSelect("class.subject", "subject")
+      .leftJoinAndSelect("subject.department", "department")
       .leftJoinAndSelect("class.teacher", "teacher");
 
     if (search) {
@@ -71,20 +72,21 @@ export class ClassesRepository {
     limit: number,
     search?: string,
   ): Promise<[Class[], number]> {
+    const subQuery = this.repo
+      .createQueryBuilder()
+      .subQuery()
+      .select("e.classId")
+      .from(Enrollment, "e")
+      .where("e.studentId = :studentId")
+      .getQuery();
+
     const qb = this.repo
       .createQueryBuilder("class")
       .leftJoinAndSelect("class.subject", "subject")
+      .leftJoinAndSelect("subject.department", "department")
       .leftJoinAndSelect("class.teacher", "teacher")
       .where("class.status = :status", { status: ClassStatus.ACTIVE })
-      .andWhere(
-        `class.id NOT IN (${this.repo
-          .createQueryBuilder()
-          .select("e.class_id")
-          .from(Enrollment, "e")
-          .where("e.student_id = :studentId")
-          .getQuery()})`,
-      )
-      .setParameter("studentId", studentId);
+      .andWhere(`class.id NOT IN ${subQuery}`, { studentId });
 
     if (search) {
       qb.andWhere(

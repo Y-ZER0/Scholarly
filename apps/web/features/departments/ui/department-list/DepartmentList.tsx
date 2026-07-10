@@ -6,10 +6,12 @@ import { PageHeader } from '@/shared/ui/components/PageHeader';
 import { DataTable, type ColumnDef } from '@/shared/ui/components/DataTable';
 import { CodeBadge } from '@/shared/ui/components/CodeBadge';
 import { useDepartments } from '../../hooks/useDepartments';
+import { useAuth } from '@/shared/context/AuthContext';
 import type { DepartmentDto } from '@repo/shared';
 
 export function DepartmentList() {
   const router = useRouter();
+  const { currentUser } = useAuth();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState('');
@@ -75,7 +77,7 @@ export function DepartmentList() {
           setSearch(value);
           setPage(1);
         }}
-        createHref="/departments/create"
+        createHref={currentUser?.role !== 'student' ? '/departments/create' : undefined}
       />
       <DataTable
         columns={columns}

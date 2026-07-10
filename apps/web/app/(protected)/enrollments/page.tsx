@@ -6,9 +6,9 @@ import { TeacherEnrollments } from '@/features/enrollments/ui/teacher-enrollment
 import { StudentEnrollments } from '@/features/enrollments/ui/student-enrollment-list/StudentEnrollments';
 
 export default function EnrollmentsPage() {
-  const { currentUser, isLoading } = useAuth();
+  const { currentUser, loading } = useAuth();
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted border-t-primary" />

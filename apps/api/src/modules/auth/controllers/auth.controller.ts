@@ -78,7 +78,15 @@ export class AuthController {
       "FRONTEND_URL",
       "http://localhost:3000",
     );
-    res.redirect(`${frontendUrl}/login?token=${authResult.accessToken}`);
+    const query = new URLSearchParams({
+      token: authResult.accessToken,
+      name: authResult.user.name,
+      email: authResult.user.email,
+      role: authResult.user.role,
+      id: authResult.user.id,
+      photo: authResult.user.profilePhoto ?? "",
+    });
+    res.redirect(`${frontendUrl}/oauth-callback?${query.toString()}`);
   }
 
   @Public()
@@ -97,6 +105,14 @@ export class AuthController {
       "FRONTEND_URL",
       "http://localhost:3000",
     );
-    res.redirect(`${frontendUrl}/login?token=${authResult.accessToken}`);
+    const query = new URLSearchParams({
+      token: authResult.accessToken,
+      name: authResult.user.name,
+      email: authResult.user.email,
+      role: authResult.user.role,
+      id: authResult.user.id,
+      photo: authResult.user.profilePhoto ?? "",
+    });
+    res.redirect(`${frontendUrl}/oauth-callback?${query.toString()}`);
   }
 }

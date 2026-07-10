@@ -1,9 +1,7 @@
 'use client';
 
 import { useMutation } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
 import { login, setToken } from '../services/auth.service';
-import { useAuth } from '@/shared/context/AuthContext';
 import type { AuthDto } from '@repo/shared';
 
 interface LoginVariables {
@@ -13,16 +11,13 @@ interface LoginVariables {
 }
 
 export function useLogin() {
-  const router = useRouter();
-  const { setUser } = useAuth();
-
   return useMutation<AuthDto, Error, LoginVariables>({
     mutationFn: ({ email, password, rememberMe }) =>
       login(email, password, rememberMe),
     onSuccess: (data) => {
       setToken(data.accessToken);
-      setUser(data.user);
-      router.push('/');
+      localStorage.setItem('auth_user', JSON.stringify(data.user));
+      window.location.href = '/';
     },
   });
 }

@@ -83,7 +83,20 @@ export class DashboardService {
           .getRawMany(),
       ]);
 
-    return { usersByRole, subjectsPerDepartment, classesPerSubject };
+    return {
+      usersByRole: usersByRole.map((r: { role: string; count: string }) => ({
+        role: r.role,
+        count: parseInt(r.count, 10),
+      })),
+      subjectsPerDepartment: subjectsPerDepartment.map((r: { name: string; count: string }) => ({
+        name: r.name,
+        count: parseInt(r.count, 10),
+      })),
+      classesPerSubject: classesPerSubject.map((r: { name: string; count: string }) => ({
+        name: r.name,
+        count: parseInt(r.count, 10),
+      })),
+    };
   }
 
   async getRecent() {

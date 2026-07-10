@@ -21,7 +21,7 @@ export function PageHeader({
   onSearch,
   filters,
   createHref,
-  createLabel = '+ Create',
+  createLabel = 'Create',
 }: PageHeaderProps) {
   return (
     <div className="mb-6">

@@ -16,9 +16,11 @@ import { useClasses } from '../../hooks/useClasses';
 import { useSubjects } from '@/features/subjects/hooks/useSubjects';
 import { useFaculty } from '@/features/faculty/hooks/useFaculty';
 import { getClassListColumns } from './columns';
+import { useAuth } from '@/shared/context/AuthContext';
 
 export function ClassList() {
   const router = useRouter();
+  const { currentUser } = useAuth();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState('');
@@ -45,14 +47,16 @@ export function ClassList() {
   const filters = (
     <div className="flex items-center gap-2">
       <Select
-        value={subjectId}
+        value={subjectId || 'all'}
         onValueChange={(value) => {
           setSubjectId(!value || value === 'all' ? '' : value);
           setPage(1);
         }}
       >
         <SelectTrigger className="h-9 w-[160px]">
-          <SelectValue placeholder="All Subjects" />
+          <SelectValue>
+            {subjects.find((s) => s.id === subjectId)?.name ?? 'All Subjects'}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All Subjects</SelectItem>
@@ -65,14 +69,16 @@ export function ClassList() {
       </Select>
 
       <Select
-        value={teacherId}
+        value={teacherId || 'all'}
         onValueChange={(value) => {
           setTeacherId(!value || value === 'all' ? '' : value);
           setPage(1);
         }}
       >
         <SelectTrigger className="h-9 w-[160px]">
-          <SelectValue placeholder="All Teachers" />
+          <SelectValue>
+            {teachers.find((t) => t.id === teacherId)?.name ?? 'All Teachers'}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All Teachers</SelectItem>
@@ -98,7 +104,7 @@ export function ClassList() {
           setPage(1);
         }}
         filters={filters}
-        createHref="/classes/create"
+        createHref={currentUser?.role !== 'student' ? '/classes/create' : undefined}
       />
       <DataTable
         columns={columns}

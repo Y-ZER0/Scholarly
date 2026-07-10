@@ -16,10 +16,12 @@ import {
 } from '@/components/ui/select';
 import { useSubjects } from '../../hooks/useSubjects';
 import { useDepartments } from '@/shared/hooks/useDepartments';
+import { useAuth } from '@/shared/context/AuthContext';
 import type { SubjectDto } from '@repo/shared';
 
 export function SubjectList() {
   const router = useRouter();
+  const { currentUser } = useAuth();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState('');
@@ -79,27 +81,32 @@ export function SubjectList() {
     },
   ];
 
-  const departmentFilter = (
-    <Select
-      value={departmentId}
-      onValueChange={(value) => {
-        setDepartmentId(!value || value === 'all' ? '' : value);
-        setPage(1);
-      }}
-    >
-      <SelectTrigger className="h-9 w-[160px]">
-        <SelectValue placeholder="All Departments" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="all">All Departments</SelectItem>
-        {departments.map((dept) => (
-          <SelectItem key={dept.id} value={dept.id}>
-            {dept.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
+  const departmentFilter = (() => {
+    const selectedDept = departments.find((d) => d.id === departmentId);
+    const displayLabel = selectedDept?.name ?? 'All Departments';
+
+    return (
+      <Select
+        value={departmentId || 'all'}
+        onValueChange={(value) => {
+          setDepartmentId(!value || value === 'all' ? '' : value);
+          setPage(1);
+        }}
+      >
+        <SelectTrigger className="h-9 w-[160px]">
+          <SelectValue>{displayLabel}</SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All Departments</SelectItem>
+          {departments.map((dept) => (
+            <SelectItem key={dept.id} value={dept.id}>
+              {dept.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    );
+  })();
 
   return (
     <div>
@@ -113,7 +120,7 @@ export function SubjectList() {
           setPage(1);
         }}
         filters={departmentFilter}
-        createHref="/subjects/create"
+        createHref={currentUser?.role !== 'student' ? '/subjects/create' : undefined}
       />
       <DataTable
         columns={columns}

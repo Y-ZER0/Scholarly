@@ -105,7 +105,9 @@ export function AddStudentDialog({ trigger }: AddStudentDialogProps) {
               }}
             >
               <SelectTrigger className="mt-1 w-full">
-                <SelectValue placeholder="Select a class" />
+                <SelectValue>
+                  {classes?.find((c) => c.id === selectedClassId)?.name ?? 'Select a class'}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {classesLoading ? (

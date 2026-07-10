@@ -133,7 +133,9 @@ export function CreateClassForm() {
               }
             >
               <SelectTrigger className="mt-1 h-10 bg-muted border-border text-foreground">
-                <SelectValue placeholder="Select a subject" />
+                <SelectValue>
+                  {subjectsData?.data.find((s) => s.id === subjectId)?.name ?? 'Select a subject'}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {subjectsData?.data.map((subject) => (
@@ -161,7 +163,9 @@ export function CreateClassForm() {
               }
             >
               <SelectTrigger className="mt-1 h-10 bg-muted border-border text-foreground">
-                <SelectValue placeholder="Select a teacher" />
+                <SelectValue>
+                  {facultyData?.data.find((t) => t.id === teacherId)?.name ?? 'Select a teacher'}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {facultyData?.data.map((teacher) => (
@@ -208,7 +212,9 @@ export function CreateClassForm() {
               }
             >
               <SelectTrigger className="mt-1 h-10 bg-muted border-border text-foreground">
-                <SelectValue placeholder="Select a status" />
+                <SelectValue>
+                  {status === 'active' ? 'Active' : 'Inactive'}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="active">Active</SelectItem>

@@ -6,16 +6,16 @@ import { useAuth } from '@/shared/context/AuthContext';
 import { LoadingSpinner } from '@/shared/ui/components/LoadingSpinner';
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (!loading && !isAuthenticated) {
       router.replace('/login');
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [loading, isAuthenticated, router]);
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <LoadingSpinner size="lg" />

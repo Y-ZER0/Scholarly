@@ -13,6 +13,18 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+function getErrorMessage(error: unknown): string {
+  if (axios.isAxiosError(error)) {
+    const serverMsg =
+      error.response?.data?.message ??
+      error.response?.data?.error ??
+      error.message;
+    if (Array.isArray(serverMsg)) return serverMsg.join(", ");
+    return serverMsg;
+  }
+  return error instanceof Error ? error.message : "An unexpected error occurred";
+}
+
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -26,6 +38,7 @@ apiClient.interceptors.response.use(
         window.location.href = '/login';
       }
     }
+    error.message = getErrorMessage(error);
     return Promise.reject(error);
   },
 );

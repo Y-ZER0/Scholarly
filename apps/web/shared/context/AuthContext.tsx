@@ -9,12 +9,12 @@ import {
   type ReactNode,
 } from 'react';
 import type { UserDto } from '@repo/shared';
-import { getToken, me as getMe, removeToken, setStoredUser, getStoredUser } from '@/features/auth/services/auth.service';
+import { getToken, setStoredUser, getStoredUser, removeToken, me } from '@/features/auth/services/auth.service';
 
 interface AuthContextValue {
   currentUser: UserDto | null;
   isAuthenticated: boolean;
-  isLoading: boolean;
+  loading: boolean;
   setUser: (user: UserDto | null) => void;
   logout: () => void;
 }
@@ -22,17 +22,24 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<UserDto | null>(() => {
-    if (!getToken()) return null;
-    return getStoredUser();
-  });
-
-  const [isLoading, setIsLoading] = useState(() => !!getToken() && !getStoredUser());
+  const [currentUser, setCurrentUser] = useState<UserDto | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (currentUser || !getToken()) return;
+    const token = getToken();
+    if (!token) {
+      setLoading(false);
+      return;
+    }
 
-    getMe()
+    const stored = getStoredUser();
+    if (stored) {
+      setCurrentUser(stored);
+      setLoading(false);
+      return;
+    }
+
+    me()
       .then((user) => {
         setCurrentUser(user);
         setStoredUser(user);
@@ -41,9 +48,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         removeToken();
       })
       .finally(() => {
-        setIsLoading(false);
+        setLoading(false);
       });
-  }, [currentUser]);
+  }, []);
 
   const setUser = useCallback((user: UserDto | null) => {
     setCurrentUser(user);
@@ -62,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         currentUser,
         isAuthenticated: currentUser !== null,
-        isLoading,
+        loading,
         setUser,
         logout,
       }}

@@ -103,7 +103,9 @@ export function CreateSubjectForm() {
             }
           >
             <SelectTrigger className="mt-1 h-10 bg-muted border-border text-foreground">
-              <SelectValue placeholder="Select a department" />
+              <SelectValue>
+                {departmentsData?.data.find((d) => d.id === departmentId)?.name ?? 'Select a department'}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {departmentsData?.data.map((dept) => (
